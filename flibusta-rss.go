@@ -1,20 +1,15 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
-	"os"
 	"path"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/gorilla/feeds"
 )
 
@@ -29,7 +24,8 @@ func absoluteURL(rpath string) string {
 	return u.String()
 }
 
-func flibustaRSS(genre string) string {
+// FlibustaRSS create RSS feed by genre
+func FlibustaRSS(genre string) string {
 	doc, err := goquery.NewDocument(fmt.Sprintf("%s/g/%s/Time", flibustaURL, genre))
 	if err != nil {
 		log.Fatal(err)
@@ -81,40 +77,4 @@ func flibustaRSS(genre string) string {
 		log.Fatal(err)
 	}
 	return rss
-}
-
-func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	if genre, ok := request.QueryStringParameters["genre"]; ok {
-		return events.APIGatewayProxyResponse{
-			Body:       flibustaRSS(genre),
-			StatusCode: 200,
-			Headers:    map[string]string{"content-type": "application/xml"},
-		}, nil
-	} else {
-		return events.APIGatewayProxyResponse{
-			Body:       "ERROR: genre required!",
-			StatusCode: 400,
-			Headers:    map[string]string{"content-type": "text/plain"},
-		}, nil
-	}
-}
-
-func rssRequest(w http.ResponseWriter, r *http.Request) {
-	genre := r.URL.Query().Get("genre")
-	if genre != "" {
-		w.Header().Set("Content-Type", "application/xml")
-		w.Write([]byte(flibustaRSS(genre)))
-	} else {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("ERROR: genre required!"))
-	}
-}
-
-func main() {
-	if _, ok := os.LookupEnv("LAMBDA_TASK_ROOT"); ok {
-		lambda.Start(handleRequest)
-	} else {
-		http.HandleFunc("/", rssRequest)
-		log.Fatal(http.ListenAndServe(":3000", nil))
-	}
 }
