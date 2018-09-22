@@ -94,6 +94,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 		return events.APIGatewayProxyResponse{
 			Body:       "ERROR: genre required!",
 			StatusCode: 400,
+			Headers:    map[string]string{"content-type": "text/plain"},
 		}, nil
 	}
 }
