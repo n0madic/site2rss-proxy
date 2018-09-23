@@ -14,6 +14,7 @@ import (
 )
 
 const flibustaURL = "http://flibusta.is"
+const maxFeedItems = 10
 
 func absoluteURL(rpath string) string {
 	u, err := url.Parse(flibustaURL)
@@ -42,7 +43,7 @@ func FlibustaRSS(genre string) string {
 	links := doc.Find("#main > form > ol > a").Map(func(i int, s *goquery.Selection) string {
 		bookLink, _ := s.Attr("href")
 		return bookLink
-	})[:10]
+	})[:maxFeedItems]
 
 	reAdded, _ := regexp.Compile(`Добавлена: (\S+)`)
 
