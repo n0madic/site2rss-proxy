@@ -7,6 +7,7 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -15,6 +16,8 @@ import (
 
 const flibustaURL = "http://flibusta.is"
 const maxFeedItems = 10
+
+var wg = sync.WaitGroup{}
 
 func absoluteURL(rpath string) string {
 	u, err := url.Parse(flibustaURL)
@@ -25,34 +28,13 @@ func absoluteURL(rpath string) string {
 	return u.String()
 }
 
-// FlibustaRSS create RSS feed by genre
-func FlibustaRSS(genre string) string {
-	doc, err := goquery.NewDocument(fmt.Sprintf("%s/g/%s/Time", flibustaURL, genre))
+func getFeedItem(url string, item **feeds.Item) {
+	defer wg.Done()
+	book, err := goquery.NewDocument(url)
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	genreTitle := doc.Find("h1.title").First().Text()
-
-	feed := &feeds.Feed{
-		Title:       fmt.Sprintf("Flibusta %s feed", genre),
-		Link:        &feeds.Link{Href: flibustaURL},
-		Description: genreTitle,
-	}
-
-	links := doc.Find("#main > form > ol > a").Map(func(i int, s *goquery.Selection) string {
-		bookLink, _ := s.Attr("href")
-		return bookLink
-	})[:maxFeedItems]
-
-	reAdded, _ := regexp.Compile(`Добавлена: (\S+)`)
-
-	for _, link := range links {
-		url := absoluteURL(link)
-		book, err := goquery.NewDocument(url)
-		if err != nil {
-			log.Fatal(err)
-		}
+		log.Println(err)
+	} else {
+		reAdded := regexp.MustCompile(`Добавлена: (\S+)`)
 		author := book.Find("#main > a:nth-child(5)").First().Text()
 		title := strings.TrimSuffix(book.Find("#main > h1").First().Text(), " (fb2)")
 		added := reAdded.FindStringSubmatch(book.Text())[1]
@@ -63,19 +45,51 @@ func FlibustaRSS(genre string) string {
 		if cover, ok := book.Find("#main > img").First().Attr("src"); ok {
 			desc = fmt.Sprintf(`<img src="%s" width="400" align="left" hspace="10"> %s`, absoluteURL(cover), desc)
 		}
-		feed.Add(&feeds.Item{
+		*item = &feeds.Item{
 			Title:       fmt.Sprintf("%s :: %s", title, author),
 			Link:        &feeds.Link{Href: url},
 			Id:          url,
 			Author:      &feeds.Author{Name: author},
 			Description: desc,
 			Created:     created,
-		})
+		}
 	}
+}
 
-	rss, err := feed.ToRss()
+// FlibustaRSS create RSS feed by genre
+func FlibustaRSS(genre string) string {
+	rss := ""
+	doc, err := goquery.NewDocument(fmt.Sprintf("%s/g/%s/Time", flibustaURL, genre))
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+	} else {
+
+		genreTitle := doc.Find("h1.title").First().Text()
+
+		feed := &feeds.Feed{
+			Title:       fmt.Sprintf("Flibusta %s feed", genre),
+			Link:        &feeds.Link{Href: flibustaURL},
+			Description: genreTitle,
+		}
+
+		links := doc.Find("#main > form > ol > a").Map(func(i int, s *goquery.Selection) string {
+			bookLink, _ := s.Attr("href")
+			return bookLink
+		})[:maxFeedItems]
+
+		feedItems := make([]*feeds.Item, maxFeedItems)
+		for i := 0; i < maxFeedItems; i++ {
+			url := absoluteURL(links[i])
+			wg.Add(1)
+			go getFeedItem(url, &feedItems[i])
+		}
+		wg.Wait()
+		feed.Items = feedItems
+
+		rss, err = feed.ToRss()
+		if err != nil {
+			log.Println(err)
+		}
 	}
 	return rss
 }
