@@ -11,19 +11,21 @@ import (
 )
 
 func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	var response events.APIGatewayProxyResponse
 	if genre, ok := request.QueryStringParameters["genre"]; ok {
-		return events.APIGatewayProxyResponse{
+		response = events.APIGatewayProxyResponse{
 			Body:       FlibustaRSS(genre),
 			StatusCode: 200,
 			Headers:    map[string]string{"content-type": "application/xml"},
-		}, nil
+		}
 	} else {
-		return events.APIGatewayProxyResponse{
+		response = events.APIGatewayProxyResponse{
 			Body:       "ERROR: genre required!",
 			StatusCode: 400,
 			Headers:    map[string]string{"content-type": "text/plain"},
-		}, nil
+		}
 	}
+	return response, nil
 }
 
 func rssRequest(w http.ResponseWriter, r *http.Request) {
