@@ -10,10 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/PuerkitoBio/goquery"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/gorilla/feeds"
 	"github.com/n0madic/site2rss"
 )
 
@@ -22,7 +20,7 @@ const flibustaURL = "http://flibusta.is"
 func flibustaRSS(genre string) string {
 	rss, err := site2rss.NewFeed(fmt.Sprintf("%s/g/%s/Time", flibustaURL, genre), fmt.Sprintf("Flibusta %s feed", genre)).
 		GetLinks("#main > form > ol > a").
-		GetFeedItems(func(book *goquery.Document) *feeds.Item {
+		GetItemsFromLinks(func(book *site2rss.Document, opts *site2rss.FindOnPage) *site2rss.Item {
 			reAdded := regexp.MustCompile(`Добавлена: (\S+)`)
 			author := book.Find("#main > a:nth-child(5)").First().Text()
 			title := strings.TrimSuffix(book.Find("#main > h1").First().Text(), " (fb2)")
@@ -33,11 +31,11 @@ func flibustaRSS(genre string) string {
 			if cover, ok := book.Find("#main > img").First().Attr("src"); ok {
 				desc = fmt.Sprintf(`<img src="%s" width="400" align="left" hspace="10"> %s`, cover, desc)
 			}
-			return &feeds.Item{
+			return &site2rss.Item{
 				Title:       fmt.Sprintf("%s :: %s", title, author),
-				Link:        &feeds.Link{Href: book.Url.String()},
+				Link:        &site2rss.Link{Href: book.Url.String()},
 				Id:          book.Url.String(),
-				Author:      &feeds.Author{Name: author},
+				Author:      &site2rss.Author{Name: author},
 				Description: desc,
 				Created:     created,
 			}
