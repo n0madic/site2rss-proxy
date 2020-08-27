@@ -14,7 +14,7 @@ import (
 
 func main() {
 	if _, ok := os.LookupEnv("LAMBDA_TASK_ROOT"); ok {
-		muxAdapter := gorillamux.New(site2rss.Router)
+		muxAdapter := gorillamux.New(site2rss.NewRouter("/site2rss"))
 		lambda.Start(func(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 			return muxAdapter.ProxyWithContext(ctx, req)
 		})
