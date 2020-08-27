@@ -1,24 +1,18 @@
-package main
+package flibusta
 
 import (
-	"context"
 	"fmt"
-	"log"
 	"net/http"
-	"os"
 	"regexp"
 	"strings"
 	"time"
 
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/gorilla/mux"
 	"github.com/n0madic/site2rss"
 )
 
-const flibustaURL = "http://flibusta.is"
-
 func flibustaRSS(genre string) string {
-	rss, err := site2rss.NewFeed(fmt.Sprintf("%s/g/%s/Time", flibustaURL, genre), fmt.Sprintf("Flibusta %s feed", genre)).
+	rss, err := site2rss.NewFeed(fmt.Sprintf("%s/g/%s/Time", "http://flibusta.is", genre), fmt.Sprintf("Flibusta %s feed", genre)).
 		GetLinks("#main > form > ol > a").
 		GetItemsFromLinks(func(book *site2rss.Document, opts *site2rss.FindOnPage) *site2rss.Item {
 			reAdded := regexp.MustCompile(`Добавлена: (\S+)`)
@@ -46,40 +40,13 @@ func flibustaRSS(genre string) string {
 	return rss
 }
 
-func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	var response events.APIGatewayProxyResponse
-	if genre, ok := request.QueryStringParameters["genre"]; ok {
-		response = events.APIGatewayProxyResponse{
-			Body:       flibustaRSS(genre),
-			StatusCode: 200,
-			Headers:    map[string]string{"content-type": "application/xml"},
-		}
-	} else {
-		response = events.APIGatewayProxyResponse{
-			Body:       "ERROR: genre required!",
-			StatusCode: 400,
-			Headers:    map[string]string{"content-type": "text/plain"},
-		}
-	}
-	return response, nil
-}
-
-func rssRequest(w http.ResponseWriter, r *http.Request) {
-	genre := r.URL.Query().Get("genre")
-	if genre != "" {
+func Handler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	if vars["genre"] != "" {
 		w.Header().Set("Content-Type", "application/xml")
-		w.Write([]byte(flibustaRSS(genre)))
+		w.Write([]byte(flibustaRSS(vars["genre"])))
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("ERROR: genre required!"))
-	}
-}
-
-func main() {
-	if _, ok := os.LookupEnv("LAMBDA_TASK_ROOT"); ok {
-		lambda.Start(handleRequest)
-	} else {
-		http.HandleFunc("/", rssRequest)
-		log.Fatal(http.ListenAndServe(":3000", nil))
 	}
 }
