@@ -12,7 +12,7 @@ import (
 )
 
 func flibustaRSS(genre string) string {
-	rss, err := site2rss.NewFeed(fmt.Sprintf("%s/g/%s/Time", "http://flibusta.is", genre), fmt.Sprintf("Flibusta %s feed", genre)).
+	rss, err := site2rss.NewFeed(fmt.Sprintf("%s/g/%s/Time", "http://flibusta.site", genre), fmt.Sprintf("Flibusta %s feed", genre)).
 		GetLinks("#main > form > ol > a").
 		GetItemsFromLinks(func(book *site2rss.Document, opts *site2rss.FindOnPage) *site2rss.Item {
 			reAdded := regexp.MustCompile(`Добавлена: (\S+)`)
