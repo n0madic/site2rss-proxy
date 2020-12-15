@@ -14,7 +14,7 @@ func gitlabReleaseRSS() (string, error) {
 			url := "https://about.gitlab.com" + doc.Find(".blog-card-title").First().AttrOr("href", "")
 			author := doc.Find(".blog-card-author > a").First().Text()
 			title := strings.TrimSpace(doc.Find(".blog-card-title > h3").First().Text())
-			created, _ := time.Parse("Jan 2, 2006", strings.TrimSpace(doc.Find(".log-card-date").First().Text()))
+			created, _ := time.Parse("Jan 2, 2006", strings.TrimSpace(doc.Find(".blog-card-date").First().Text()))
 			desc, _ := doc.Find(".blog-card-excerpt").First().Html()
 			desc = strings.TrimSpace(desc)
 			return &site2rss.Item{
