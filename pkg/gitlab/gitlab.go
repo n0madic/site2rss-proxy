@@ -10,12 +10,12 @@ import (
 
 func gitlabReleaseRSS() (string, error) {
 	return site2rss.NewFeed("https://about.gitlab.com/releases/categories/releases/", "GitLab releases").
-		GetItemsFromQuery(".article", func(doc *site2rss.Selection, opts *site2rss.FindOnPage) *site2rss.Item {
-			url := "https://about.gitlab.com" + doc.Find("a.more").First().AttrOr("href", "")
-			author := doc.Find("div.author > strong > a").First().Text()
-			title := strings.TrimSpace(doc.Find("div.overlay > h3").First().Text())
-			created, _ := time.Parse("Jan 2, 2006", strings.TrimSpace(doc.Find("div.date").First().Text()))
-			desc, _ := doc.Find(".summary").First().Html()
+		GetItemsFromQuery(".blog-card", func(doc *site2rss.Selection, opts *site2rss.FindOnPage) *site2rss.Item {
+			url := "https://about.gitlab.com" + doc.Find(".blog-card-title").First().AttrOr("href", "")
+			author := doc.Find(".blog-card-author > a").First().Text()
+			title := strings.TrimSpace(doc.Find(".blog-card-title > h3").First().Text())
+			created, _ := time.Parse("Jan 2, 2006", strings.TrimSpace(doc.Find(".log-card-date").First().Text()))
+			desc, _ := doc.Find(".blog-card-excerpt").First().Html()
 			desc = strings.TrimSpace(desc)
 			return &site2rss.Item{
 				Title:       title,
@@ -28,6 +28,7 @@ func gitlabReleaseRSS() (string, error) {
 		}).GetRSS()
 }
 
+// Handler HTTP
 func Handler(w http.ResponseWriter, r *http.Request) {
 	rss, err := gitlabReleaseRSS()
 	if err == nil {
