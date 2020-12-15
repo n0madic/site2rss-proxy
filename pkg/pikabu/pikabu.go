@@ -22,7 +22,7 @@ func pikabuRSS(location string) string {
 				author := doc.Find(".user__nick").First().Text()
 				title := doc.Find(".story__title").First().Text()
 				title = site2rss.ConvertToUTF8(title, "windows-1251")
-				created, _ := time.Parse(time.RFC3339, doc.Find("div.user__info-item > time").First().AttrOr("datetime", ""))
+				created, _ := time.Parse(time.RFC3339, doc.Find(".story__datetime").First().AttrOr("datetime", ""))
 				desc, _ := doc.Find(".story__content-inner").Each(func(i int, sel *site2rss.Selection) {
 					sel.Find(".story-image__image").Each(func(i int, sel *site2rss.Selection) {
 						sel.SetAttr("src", sel.AttrOr("data-src", ""))
