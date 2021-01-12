@@ -10,7 +10,7 @@ func gitlabReleaseRSS() (string, error) {
 	return site2rss.NewFeed("https://about.gitlab.com/releases/categories/releases/", "GitLab releases").
 		GetLinks(".blog-hero-title, .blog-card-title").
 		SetParseOptions(&site2rss.FindOnPage{
-			Title:       ".blog.article > div.wrapper.body > h1",
+			Title:       ".blog.article > div.wrapper.body > h1, .cover > div > div > h1",
 			Author:      "span.author > a:nth-child(1)",
 			Date:        "span.date",
 			DateFormat:  "Jan 2, 2006",
