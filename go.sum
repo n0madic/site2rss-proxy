@@ -149,8 +149,8 @@ github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJ
 github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/modern-go/reflect2 v1.0.1/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/moul/http2curl v1.0.0/go.mod h1:8UbvGypXm98wA/IqH45anm5Y2Z6ep6O31QGOAZ3H0fQ=
-github.com/n0madic/site2rss v0.0.0-20211207205121-af7a26715fc9 h1:QGoGIQmUD57x70nazW3pNE+pctaZq4g/tW1P6j8S5YE=
-github.com/n0madic/site2rss v0.0.0-20211207205121-af7a26715fc9/go.mod h1:w/95Lr/9HmLvFS4z2Im37h2fOIv9ilFUI8OIz4A6oJA=
+github.com/n0madic/site2rss v0.0.0-20211207220335-a8f026c9b8e6 h1:yU/4Vvyaw4xHLmNjHR8R4lEKmawfFi3wbJ4R3wrHEaM=
+github.com/n0madic/site2rss v0.0.0-20211207220335-a8f026c9b8e6/go.mod h1:w/95Lr/9HmLvFS4z2Im37h2fOIv9ilFUI8OIz4A6oJA=
 github.com/nats-io/jwt v0.3.0/go.mod h1:fRYCDE99xlTsqUzISS1Bi75UBJ6ljOJQOAAu5VglpSg=
 github.com/nats-io/nats.go v1.9.1/go.mod h1:ZjDU1L/7fJ09jvUSRVBR2e7+RnLiiIQyqyzEE/Zbp4w=
 github.com/nats-io/nkeys v0.1.0/go.mod h1:xpnFELMwJABBLVhffcfd1MZx6VsNRFpEugbxziKVo7w=
