@@ -16,6 +16,12 @@ func golangBlogRSS() (string, error) {
 			URL:         ".post-title > a",
 		}).
 		GetItemsFromQuery(".date-outer", site2rss.ParseQuery).
+		FilterItems(site2rss.Filters{
+			Selectors: []string{
+				".separator",
+				".tlglink",
+			},
+		}).
 		GetRSS()
 }
 
