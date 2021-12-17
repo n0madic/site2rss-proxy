@@ -17,7 +17,7 @@ func golangBlogRSS() (string, error) {
 		}).
 		GetItemsFromQuery(".date-outer", site2rss.ParseQuery).
 		FilterItems(site2rss.Filters{
-			Selectors: []string{
+			Selector: []string{
 				".separator",
 				".tlglink",
 			},
