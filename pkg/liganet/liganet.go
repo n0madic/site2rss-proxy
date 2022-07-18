@@ -18,6 +18,15 @@ func ligaNewsRSS(tag string) (string, error) {
 			Description: "#news-text",
 		}).
 		GetItemsFromLinks(site2rss.ParseItem).
+		FilterItems(site2rss.Filters{
+			Text: []string{
+				"Читайте нас в Telegram:",
+				"Читайте нас у Telegram:",
+				"Читайте также:",
+				"Читайте також:",
+				"Ctrl+Enter",
+			},
+		}).
 		GetRSS()
 }
 
