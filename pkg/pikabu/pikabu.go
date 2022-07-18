@@ -20,7 +20,7 @@ func pikabuRSS(location string) string {
 			if !sponsor {
 				url := doc.Find(".story__title > a").First().AttrOr("href", "")
 				author := doc.Find(".user__nick").First().Text()
-				title := doc.Find(".story__title").First().Text()
+				title := doc.Find(".story__title-link").First().Text()
 				title = site2rss.ConvertToUTF8(title, "windows-1251")
 				created, _ := time.Parse(time.RFC3339, doc.Find(".story__datetime").First().AttrOr("datetime", ""))
 				desc, _ := doc.Find(".story__content-inner").Each(func(i int, sel *site2rss.Selection) {
