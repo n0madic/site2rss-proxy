@@ -2,6 +2,8 @@ package liganet
 
 import (
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/n0madic/site2rss"
@@ -9,15 +11,22 @@ import (
 
 func ligaNewsRSS(tag string) (string, error) {
 	return site2rss.NewFeed("https://www.liga.net/tag/"+tag, "Liga.net News").
-		GetLinks("div.title > a:nth-child(1)").
-		SetParseOptions(&site2rss.FindOnPage{
-			Title:       ".article-content > h1",
-			Author:      ".author-redactor",
-			Date:        ".article-time",
-			DateFormat:  "02.01.2006, 15:04",
-			Description: "#news-text",
+		GetLinks("a.news-card__title").
+		GetItemsFromLinks(func(doc *site2rss.Document, opts *site2rss.FindOnPage) *site2rss.Item {
+			link := doc.Url.String()
+			title := strings.TrimSpace(doc.Find(".article-header__title").First().Text())
+			author := strings.TrimSpace(doc.Find(".article-header__user .user__name").First().Text())
+			created, _ := time.Parse(time.RFC3339, doc.Find("time.article-header__date").First().AttrOr("datetime", ""))
+			desc, _ := doc.Find(".article-body").First().Html()
+			return &site2rss.Item{
+				Title:       title,
+				Link:        &site2rss.Link{Href: link},
+				Id:          link,
+				Author:      &site2rss.Author{Name: author},
+				Description: desc,
+				Created:     created,
+			}
 		}).
-		GetItemsFromLinks(site2rss.ParseItem).
 		FilterItems(site2rss.Filters{
 			Text: []string{
 				"Читайте нас в Telegram:",
